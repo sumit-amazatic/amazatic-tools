@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SSL Checker</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>SSL Checker</h1>
+        <form id="sslForm" class="mt-4">
+            <div class="form-group">
+                <label for="websiteUrl">Website URL:</label>
+                <input type="text" class="form-control" id="websiteUrl" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Check SSL</button>
+        </form>
+        <div id="result" class="mt-4"></div>
+    </div>
+
+    <!-- Include Bootstrap JS and your custom JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+ function checkSSL(event) {
+    event.preventDefault();
+
+    var websiteUrl = document.getElementById("websiteUrl").value;
+
+    // Retrieve the CSRF token value from the cookie
+    var csrftoken = getCookie('csrftoken');
+
+    // Make an AJAX request to the Django backend, including the CSRF token
+    $.ajax({
+        url: 'http://127.0.0.1:8000/check_ssl/',
+        method: 'POST',
+        data: {
+            website_url: websiteUrl
+        },
+        headers: {
+            'X-CSRFToken': csrftoken
+        },
+        success: function (response) {
+            // Handle the response from the backend
+            var certificateInfo = response.certificate_info;
+
+            // Display the result
+            document.getElementById("result").innerHTML = certificateInfo;
+        },
+        error: function () {
+            document.getElementById("result").innerHTML = "Error: Unable to retrieve SSL certificate.";
+        }
+    });
+}
+
+// Function to retrieve the value of a specific cookie
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+    </script>
+</body>
+</html>
